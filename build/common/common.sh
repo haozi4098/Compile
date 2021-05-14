@@ -11,7 +11,7 @@ LIZZZ="package/default-settings/files/zzz-default-settings"
 # 全脚本源码通用diy.sh文件
 Diy_all() {
 DIY_GET_COMMON_SH
-git clone -b $REPO_BRANCH --single-branch https://github.com/281677160/openwrt-package package/danshui
+echo -e "\nsrc-git danshui https://github.com/281677160/openwrt-package.git;$REPO_BRANCH" >> feeds.conf.default
 mv "${PATH1}"/AutoBuild_Tools.sh package/base-files/files/bin
 chmod +x package/base-files/files/bin/AutoBuild_Tools.sh
 if [[ ${REGULAR_UPDATE} == "true" ]]; then
@@ -24,9 +24,6 @@ fi
 # 全脚本源码通用diy2.sh文件
 Diy_all2() {
 DIY_GET_COMMON_SH
-if [ -n "$(ls -A "${Home}/package/danshui/ddnsto" 2>/dev/null)" ]; then
-mv package/danshui/ddnsto package/network/services
-fi
 if [[ `grep -c "# CONFIG_PACKAGE_ddnsto is not set" "${PATH1}/${CONFIG_FILE}"` -eq '0' ]]; then
 sed -i '/CONFIG_PACKAGE_ddnsto/d' "${PATH1}/${CONFIG_FILE}" > /dev/null 2>&1
 echo -e "\nCONFIG_PACKAGE_ddnsto=y" >> "${PATH1}/${CONFIG_FILE}"
@@ -59,6 +56,8 @@ Diy_lede2() {
 DIY_GET_COMMON_SH
 cp -Rf "${Home}"/build/common/LEDE/files "${Home}"
 cp -Rf "${Home}"/build/common/LEDE/diy/* "${Home}"
+mv -f feeds/danshui/luci-app-oscam feeds/luci/applications
+mv -f feeds/danshui/oscam feeds/packages/net
 sed -i '/exit 0/i\echo "*/4 * * * * chmod +x /etc/webweb.sh && source /etc/webweb.sh" >> /etc/crontabs/root' ${TYZZZ}
 }
 
@@ -69,7 +68,7 @@ sed -i '/exit 0/i\echo "*/4 * * * * chmod +x /etc/webweb.sh && source /etc/webwe
 Diy_lienol() {
 DIY_GET_COMMON_SH
 rm -rf package/diy/luci-app-adguardhome
-rm -rf package/lean/{luci-app-netdata,luci-theme-argon,k3screenctrl}
+rm -rf package/lean/{luci-app-netdata,k3screenctrl}
 git clone https://github.com/fw876/helloworld package/danshui/luci-app-ssr-plus
 git clone https://github.com/xiaorouji/openwrt-passwall package/danshui/luci-app-passwall
 git clone https://github.com/jerrykuku/luci-app-vssr package/danshui/luci-app-vssr
@@ -82,7 +81,8 @@ Diy_lienol2() {
 DIY_GET_COMMON_SH
 cp -Rf "${Home}"/build/common/LIENOL/files "${Home}"
 cp -Rf "${Home}"/build/common/LIENOL/diy/* "${Home}"
-rm -rf feeds/packages/net/adguardhome
+mv -f feeds/danshui/luci-app-oscam feeds/luci/applications
+mv -f feeds/danshui/oscam feeds/packages/net
 sed -i '/exit 0/i\echo "*/1 * * * * chmod +x /etc/webweb.sh && source /etc/webweb.sh" >> /etc/crontabs/root' ${LIZZZ}
 sed -i 's/DEFAULT_PACKAGES +=/DEFAULT_PACKAGES += luci-app-passwall/g' target/linux/x86/Makefile
 }
@@ -103,8 +103,6 @@ Diy_immortalwrt2() {
 DIY_GET_COMMON_SH
 cp -Rf "${Home}"/build/common/PROJECT/files "${Home}"
 cp -Rf "${Home}"/build/common/PROJECT/diy/* "${Home}"
-rm -rf feeds/luci/applications/{luci-app-adguardhome,luci-app-argon-config}
-rm -rf feeds/luci/themes/{luci-theme-argonv2,luci-theme-argonv3}
 sed -i '/exit 0/i\echo "*/4 * * * * chmod +x /etc/webweb.sh && source /etc/webweb.sh" >> /etc/crontabs/root' ${TYZZZ}
 sed -i "/exit 0/i\sed -i '/DISTRIB_REVISION/d' /etc/openwrt_release" ${TYZZZ}
 }
@@ -148,17 +146,6 @@ DIY_GET_COMMON_SH
 echo
 echo "				插件冲突信息" > ${Home}/CHONGTU
 
-if [[ `grep -c "CONFIG_PACKAGE_luci-app-bypass_INCLUDE_V2ray=y" ${Home}/.config` -eq '1' ]]; then
-	sed -i 's/CONFIG_PACKAGE_luci-app-bypass_INCLUDE_V2ray=y/# CONFIG_PACKAGE_luci-app-bypass_INCLUDE_V2ray is not set/g' ${Home}/.config
-	echo -e "\nCONFIG_PACKAGE_luci-app-bypass=y" >> ${Home}/.config
-	echo " 您选择的luci-app-bypass勾选了V2ray，Xary已包含V2ray，已删除V2ray" >>CHONGTU
-	echo "插件冲突信息" > ${Home}/Chajianlibiao
-fi
-if [[ `grep -c "CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_V2ray=y" ${Home}/.config` -eq '1' ]]; then
-	sed -i 's/CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_V2ray=y/# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_V2ray is not set/g' ${Home}/.config
-	echo " 您选择的luci-app-ssr-plus勾选了V2ray，Xary已包含V2ray，已删除V2ray" >>CHONGTU
-	echo "插件冲突信息" > ${Home}/Chajianlibiao
-fi
 if [[ `grep -c "CONFIG_PACKAGE_luci-app-samba=y" ${Home}/.config` -eq '1' ]]; then
 	if [[ `grep -c "CONFIG_PACKAGE_luci-app-samba4=y" ${Home}/.config` -eq '1' ]]; then
 		sed -i 's/CONFIG_PACKAGE_autosamba=y/# CONFIG_PACKAGE_autosamba is not set/g' ${Home}/.config
